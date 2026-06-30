@@ -10,7 +10,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.1",
-	"EngineVersion": "5.7.0",
+	"EngineVersion": "5.8.0",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
