@@ -1,4 +1,4 @@
-// Copyright Les Androïds Associés. All Rights Reserved.
+// Copyright (c) 2022 Nicolas Castelli. Licensed under the MIT License.
 
 using UnrealBuildTool;
 

@@ -1,4 +1,4 @@
-// Copyright Les Androïds Associés. All Rights Reserved.
+// Copyright (c) 2022 Nicolas Castelli. Licensed under the MIT License.
 
 #include "FlatNodesSettings.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -24,6 +24,8 @@ void UFlatNodesSettings::PostEditChangeProperty(struct FPropertyChangedEvent& Pr
 	if (PropertyChangedEvent.Property)
 	{
 		const FName NAME_HeaderBrightness = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, HeaderBrightness);
+		const FName NAME_bNodeTitleColor = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, bNodeTitleColor);
+		const FName NAME_NodeTitleColor = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, NodeTitleColor);
 		const FName PropertyName = PropertyChangedEvent.GetPropertyName();
 
 		if (PropertyName == NAME_HeaderBrightness)
@@ -36,6 +38,40 @@ void UFlatNodesSettings::PostEditChangeProperty(struct FPropertyChangedEvent& Pr
 				UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(Material);
 				DynamicMaterial->SetVectorParameterValue("Color", FVector(HeaderBrightness, HeaderBrightness, HeaderBrightness));
 			}
+		}
+
+		if (PropertyName == NAME_bNodeTitleColor)
+		{
+			// Here, we choose either the theme default color or the user one.
+			if (bNodeTitleColor)
+			{
+				SetNodeTitleColor(FSlateColor(EStyleColor::User1));
+			}
+			else
+			{
+				SetNodeTitleColor(FStyleColors::Foreground);
+			}
+		}
+
+		if (PropertyName == NAME_NodeTitleColor)
+		{
+			//if (bNodeTitleColor)
+			//{
+			//	// Change EStyleColor::User1 according to NodeTitleColor.
+			//	USlateThemeManager::Get().SetDefaultColor(EStyleColor::User1, NodeTitleColor);
+			//	//SetNodeTitleColor(FSlateColor(EStyleColor::User1));
+			//}
+			//else
+			//{
+			//	// Change EStyleColor::User1 according to FStyleColors::Foreground which is the theme default color used by the editor usually.
+			//	USlateThemeManager::Get().SetDefaultColor(EStyleColor::User1, FStyleColors::Foreground.GetSpecifiedColor());
+			//	//SetNodeTitleColor(FStyleColors::Foreground);
+			//}
+
+			// Change EStyleColor::User1 according to NodeTitleColor.
+			USlateThemeManager::Get().SetDefaultColor(EStyleColor::User1, NodeTitleColor);
+
+			RefreshCurrentTheme();
 		}
 	}
 }
@@ -56,6 +92,31 @@ FSlateBrush* UFlatNodesSettings::CreateHeaderBrush()
 	SlateBrushes.Add("HeaderBrush", SlateBrush);
 
 	return SlateBrush;
+}
+
+void UFlatNodesSettings::SetNodeTitleColor(const FSlateColor& Color)
+{
+	FSlateStyleSet* Style = (FSlateStyleSet*)&FAppStyle::Get();
+
+	// Change the color used by "Graph.Node.NodeTitle" style. Bypass the use of const by GetWidgetStyle().
+	FTextBlockStyle& GraphNodeTitle = const_cast<FTextBlockStyle&>(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("Graph.Node.NodeTitle"));
+	GraphNodeTitle.SetColorAndOpacity(Color);
+	Style->Set("Graph.Node.NodeTitle", GraphNodeTitle);
+
+	// To see the change on node titles, we also need to update "Graph.Node.NodeTitleInlineEditableText" style. Bypass the use of const by GetWidgetStyle().
+	FInlineEditableTextBlockStyle& GraphNodeTitleInlineEditableText = const_cast<FInlineEditableTextBlockStyle&>(FAppStyle::Get().GetWidgetStyle<FInlineEditableTextBlockStyle>("Graph.Node.NodeTitleInlineEditableText"));
+	GraphNodeTitleInlineEditableText.SetTextStyle(GraphNodeTitle);
+	Style->Set("Graph.Node.NodeTitleInlineEditableText", GraphNodeTitleInlineEditableText);
+}
+
+void UFlatNodesSettings::RefreshCurrentTheme()
+{
+	// Get the current theme. Bypass the use of const by GetCurrentTheme().
+	FStyleTheme& Theme = const_cast<FStyleTheme&>(USlateThemeManager::Get().GetCurrentTheme());
+	// Simulate a change in the current theme to force applyTheme() to fire.
+	Theme.LoadedDefaultColors.Empty();
+	// Refresh the theme to see the colors change.
+	USlateThemeManager::Get().ApplyTheme(USlateThemeManager::Get().GetCurrentThemeID());
 }
 
 #undef LOCTEXT_NAMESPACE
