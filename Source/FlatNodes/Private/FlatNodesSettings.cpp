@@ -3,6 +3,8 @@
 #include "FlatNodesSettings.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
+#include "Misc/EngineVersionComparison.h"
+
 #define LOCTEXT_NAMESPACE "FlatNodes"
 
 UFlatNodesSettings::UFlatNodesSettings()
@@ -23,10 +25,26 @@ void UFlatNodesSettings::PostEditChangeProperty(struct FPropertyChangedEvent& Pr
 
 	if (PropertyChangedEvent.Property)
 	{
+		const FName NAME_bHeaderUseGradient = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, bHeaderUseGradient);
 		const FName NAME_HeaderBrightness = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, HeaderBrightness);
+		const FName NAME_HeaderOpacity = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, HeaderOpacity);
 		const FName NAME_bNodeTitleColor = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, bNodeTitleColor);
 		const FName NAME_NodeTitleColor = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, NodeTitleColor);
+		const FName NAME_RegularNodeOpacity = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, RegularNodeOpacity);
+		const FName NAME_VarNodeOpacity = GET_MEMBER_NAME_CHECKED(UFlatNodesSettings, VarNodeOpacity);
 		const FName PropertyName = PropertyChangedEvent.GetPropertyName();
+
+		if (PropertyName == NAME_bHeaderUseGradient)
+		{
+			UObject* ResourceObject = SlateBrushes["HeaderBrush"]->GetResourceObject();
+			UMaterialInterface* Material = Cast<UMaterialInterface>(ResourceObject);
+
+			if (Material)
+			{
+				UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(Material);
+				DynamicMaterial->SetScalarParameterValue("UseGradient", bHeaderUseGradient);
+			}
+		}
 
 		if (PropertyName == NAME_HeaderBrightness)
 		{
@@ -37,6 +55,18 @@ void UFlatNodesSettings::PostEditChangeProperty(struct FPropertyChangedEvent& Pr
 			{
 				UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(Material);
 				DynamicMaterial->SetVectorParameterValue("Color", FVector(HeaderBrightness, HeaderBrightness, HeaderBrightness));
+			}
+		}
+
+		if (PropertyName == NAME_HeaderOpacity)
+		{
+			UObject* ResourceObject = SlateBrushes["HeaderBrush"]->GetResourceObject();
+			UMaterialInterface* Material = Cast<UMaterialInterface>(ResourceObject);
+
+			if (Material)
+			{
+				UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(Material);
+				DynamicMaterial->SetScalarParameterValue("Opacity", HeaderOpacity);
 			}
 		}
 
@@ -73,6 +103,30 @@ void UFlatNodesSettings::PostEditChangeProperty(struct FPropertyChangedEvent& Pr
 
 			RefreshCurrentTheme();
 		}
+
+		if (PropertyName == NAME_RegularNodeOpacity)
+		{
+			UObject* ResourceObject = SlateBrushes["BodyBrush"]->GetResourceObject();
+			UMaterialInterface* Material = Cast<UMaterialInterface>(ResourceObject);
+
+			if (Material)
+			{
+				UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(Material);
+				DynamicMaterial->SetScalarParameterValue("Opacity", RegularNodeOpacity);
+			}
+		}
+
+		if (PropertyName == NAME_VarNodeOpacity)
+		{
+			UObject* ResourceObject = SlateBrushes["BodyBrush_Var"]->GetResourceObject();
+			UMaterialInterface* Material = Cast<UMaterialInterface>(ResourceObject);
+
+			if (Material)
+			{
+				UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(Material);
+				DynamicMaterial->SetScalarParameterValue("Opacity", VarNodeOpacity);
+			}
+		}
 	}
 }
 #endif	// WITH_EDITOR
@@ -85,11 +139,56 @@ FSlateBrush* UFlatNodesSettings::CreateHeaderBrush()
 	UMaterial* Material = LoadObject<UMaterial>(nullptr, *MaterialPath);
 	UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this);
 
+	DynamicMaterial->SetScalarParameterValue("UseGradient", bHeaderUseGradient);
 	DynamicMaterial->SetVectorParameterValue("Color", FVector(HeaderBrightness, HeaderBrightness, HeaderBrightness));
+	DynamicMaterial->SetScalarParameterValue("Opacity", HeaderOpacity);
 	DynamicMaterial->AddToRoot();
 
 	SlateBrush->SetResourceObject(DynamicMaterial);
+	SlateBrush->DrawAs = ESlateBrushDrawType::Box;
 	SlateBrushes.Add("HeaderBrush", SlateBrush);
+
+#if UE_VERSION_OLDER_THAN(5, 7, 0) // <5.7.0
+	SlateBrush->Margin = FMargin(0, -1.0f / 32.0f, -3.0f / 20.0f, 0);
+#endif // pre-5.7.0
+
+	return SlateBrush;
+}
+
+FSlateBrush* UFlatNodesSettings::CreateBodyBrush()
+{
+	FSlateBrush* SlateBrush = new FSlateBrush();
+
+	const FString MaterialPath = FString("/FLatNodes/Materials/Box.Box");
+	UMaterial* Material = LoadObject<UMaterial>(nullptr, *MaterialPath);
+	UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this);
+
+	DynamicMaterial->SetVectorParameterValue("Color", FVector(0.0145f, 0.0145f, 0.0145f));
+	DynamicMaterial->SetScalarParameterValue("Opacity", RegularNodeOpacity);
+	DynamicMaterial->AddToRoot();
+
+	SlateBrush->SetResourceObject(DynamicMaterial);
+	SlateBrush->DrawAs = ESlateBrushDrawType::Box;
+	SlateBrushes.Add("BodyBrush", SlateBrush);
+
+	return SlateBrush;
+}
+
+FSlateBrush* UFlatNodesSettings::CreateBodyBrush_Var()
+{
+	FSlateBrush* SlateBrush = new FSlateBrush();
+
+	const FString MaterialPath = FString("/FLatNodes/Materials/Box.Box");
+	UMaterial* Material = LoadObject<UMaterial>(nullptr, *MaterialPath);
+	UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this);
+
+	DynamicMaterial->SetVectorParameterValue("Color", FVector(0.0145f, 0.0145f, 0.0145f));
+	DynamicMaterial->SetScalarParameterValue("Opacity", VarNodeOpacity);
+	DynamicMaterial->AddToRoot();
+
+	SlateBrush->SetResourceObject(DynamicMaterial);
+	SlateBrush->DrawAs = ESlateBrushDrawType::Box;
+	SlateBrushes.Add("BodyBrush_Var", SlateBrush);
 
 	return SlateBrush;
 }

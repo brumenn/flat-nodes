@@ -8,6 +8,11 @@ There is no impact on the performance and stability of the engine, only the visu
 
 Works well on UE4 and UE5, since these files have not changed and the visual appearance of the graph nodes uses these same files.
 
+### Features
+- Graph nodes flat style
+- **[New in 5.0+]** Add few plugin settings : choose between gradient or true flat header - brightness control over flat header
+- **[New in 5.8+]** Add custom title color and node opacity in settings - brightness control over gradient header too
+
 ## Installation
 
 ### From Fab

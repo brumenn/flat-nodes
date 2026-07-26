@@ -7,8 +7,6 @@
 #include "Styling/SlateStyleMacros.h"
 #include "EditorStyleSet.h"
 
-#include "Misc/EngineVersionComparison.h"
-
 #define LOCTEXT_NAMESPACE "FFlatNodesModule"
 
 #define RootToContentDir Style->RootToContentDir
@@ -35,33 +33,23 @@ void FFlatNodesModule::ApplyEditorStyle()
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("FlatNodes")->GetBaseDir() / TEXT("Resources"));
 
 	UFlatNodesSettings* FlatNodesSettings = GetMutableDefault<UFlatNodesSettings>();
-	const bool bHeaderUseGradient = FlatNodesSettings->bHeaderUseGradient;
+	FSlateBrush* HeaderBrush = FlatNodesSettings->CreateHeaderBrush();
+	FSlateBrush* BodyBrush = FlatNodesSettings->CreateBodyBrush();
+	FSlateBrush* BodyBrush_Var = FlatNodesSettings->CreateBodyBrush_Var();
 
 	Style->Set("Graph.PlayInEditor", new BOX_BRUSH("Graph/RegularNode_shadow_selected", FMargin(18.0f / 64.0f)));
 
-	Style->Set("Graph.Node.Body", new BOX_BRUSH("Graph/RegularNode_body", FMargin(16.f / 64.f, 25.f / 64.f, 16.f / 64.f, 16.f / 64.f)));
-	Style->Set("Graph.Node.TintedBody", new BOX_BRUSH("Graph/TintedNode_body", FMargin(16.f / 64.f, 25.f / 64.f, 16.f / 64.f, 16.f / 64.f)));
+	Style->Set("Graph.Node.Body", BodyBrush);
+	Style->Set("Graph.Node.TintedBody", BodyBrush);
 	Style->Set("Graph.Node.TitleGloss", new BOX_BRUSH("Graph/RegularNode_title_gloss", FMargin(12.0f / 64.0f)));
-	if (bHeaderUseGradient)
-	{
-		Style->Set("Graph.Node.ColorSpill", new BOX_BRUSH("Graph/RegularNode_color_spill", FMargin(8.0f / 64.0f, 3.0f / 32.0f, 0, 0)));
-	}
-	else
-	{
-		FSlateBrush* HeaderBrush = FlatNodesSettings->CreateHeaderBrush();
-#if UE_VERSION_OLDER_THAN(5, 7, 0) // <5.7.0
-		HeaderBrush->Margin = FMargin(0, -1.0f / 32.0f, -3.0f / 20.0f, 0);
-#endif // pre-5.7.0
-		HeaderBrush->DrawAs = ESlateBrushDrawType::Box;
-		Style->Set("Graph.Node.ColorSpill", HeaderBrush);
-	}
+	Style->Set("Graph.Node.ColorSpill", HeaderBrush);
 	Style->Set("Graph.Node.TitleHighlight", new BOX_BRUSH("Graph/RegularNode_title_highlight", FMargin(16.0f / 64.0f, 1.0f, 16.0f / 64.0f, 0.0f)));
 
 	Style->Set("Graph.Node.ShadowSize", FVector2D(12, 12));
 	Style->Set("Graph.Node.ShadowSelected", new BOX_BRUSH("Graph/RegularNode_shadow_selected", FMargin(18.0f / 64.0f)));
 	Style->Set("Graph.Node.Shadow", new BOX_BRUSH("Graph/RegularNode_shadow", FMargin(18.0f / 64.0f)));
 
-	Style->Set("Graph.VarNode.Body", new BOX_BRUSH("Graph/VarNode_body", FMargin(16.f / 64.f, 12.f / 28.f)));
+	Style->Set("Graph.VarNode.Body", BodyBrush_Var);
 	Style->Set("Graph.VarNode.ColorSpill", new IMAGE_BRUSH("Graph/VarNode_color_spill", FVector2D(132, 28)));
 	Style->Set("Graph.VarNode.Gloss", new BOX_BRUSH("Graph/VarNode_gloss", FMargin(16.f / 64.f, 16.f / 28.f, 16.f / 64.f, 4.f / 28.f)));
 

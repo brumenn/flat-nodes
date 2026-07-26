@@ -31,16 +31,23 @@ public:
 #endif
 
 	FSlateBrush* CreateHeaderBrush();
+	FSlateBrush* CreateBodyBrush();
+	FSlateBrush* CreateBodyBrush_Var();
+
 	void SetNodeTitleColor(const FSlateColor& Color);
 	void RefreshCurrentTheme();
 
 	/** Whether to use gradient on node header or not. Default: false */
-	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Use Gradient", meta = (ConfigRestartRequired = true))
+	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Use Gradient")
 	bool bHeaderUseGradient;
 
 	/** Brightness of node header. Default: 0.25 */
-	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Brightness", meta = (EditCondition = "!bHeaderUseGradient", ClampMin = "0", ClampMax = "1"))
+	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Brightness", meta = (ClampMin = "0", ClampMax = "1"))
 	float HeaderBrightness = 0.25f;
+
+	/** Opacity of node header. Default: 1.0 */
+	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Opacity", meta = (ClampMin = "0", ClampMax = "1"))
+	float HeaderOpacity = 1.0f;
 
 	/** Whether to use default color (FStyleColors::Foreground) or the below user color for node title color. Must at least reopen graph editors already opened to see effect on it. Default: false */
 	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Use Title Color", meta = (ConfigRestartRequired = true))
@@ -49,6 +56,14 @@ public:
 	/** User node title color (EStyleColor::User1). Default: same as FStyleColors::Foreground */
 	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Title Color", meta = (EditCondition = "bNodeTitleColor"))
 	FLinearColor NodeTitleColor = FStyleColors::Foreground.GetSpecifiedColor();
+
+	/** Opacity of regular node background. Default: 0.9 */
+	UPROPERTY(config, EditAnywhere, Category = "Body|RegularNode", DisplayName = "Background Opacity", meta = (ClampMin = "0", ClampMax = "1"))
+	float RegularNodeOpacity = 0.9f;
+
+	/** Opacity of var node background. Default: 0.89 */
+	UPROPERTY(config, EditAnywhere, Category = "Body|VarNode", DisplayName = "Background Opacity", meta = (ClampMin = "0", ClampMax = "1"))
+	float VarNodeOpacity = 0.89f;
 
 	TMap<FString, FSlateBrush*> SlateBrushes;
 };
