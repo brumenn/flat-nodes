@@ -28,6 +28,12 @@ public:
 	 * @param PropertyThatChanged the property that was modified
 	 */
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	/**
+	 * This alternate version of PostEditChange is called when properties inside structs are modified. The property that was actually modified
+	 * is located at the tail of the list. The head of the list is the FStructProperty member variable that contains the property that was modified.
+	 */
+	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #endif
 
 	FSlateBrush* CreateHeaderBrush();
@@ -57,13 +63,13 @@ public:
 	UPROPERTY(config, EditAnywhere, Category = "Header", DisplayName = "Title Color", meta = (EditCondition = "bNodeTitleColor"))
 	FLinearColor NodeTitleColor = FStyleColors::Foreground.GetSpecifiedColor();
 
-	/** Opacity of regular node background. Default: 0.9 */
-	UPROPERTY(config, EditAnywhere, Category = "Body|RegularNode", DisplayName = "Background Opacity", meta = (ClampMin = "0", ClampMax = "1"))
-	float RegularNodeOpacity = 0.9f;
+	/** Color of regular node background. Default: 0.0145f, 0.0145f, 0.0145f, 0.9f */
+	UPROPERTY(config, EditAnywhere, Category = "Body|RegularNode", DisplayName = "Background Color")
+	FLinearColor RegularNodeColor = FLinearColor(0.0145f, 0.0145f, 0.0145f, 0.9f);
 
-	/** Opacity of var node background. Default: 0.89 */
-	UPROPERTY(config, EditAnywhere, Category = "Body|VarNode", DisplayName = "Background Opacity", meta = (ClampMin = "0", ClampMax = "1"))
-	float VarNodeOpacity = 0.89f;
+	/** Color of var node background. Default: 0.0145f, 0.0145f, 0.0145f, 0.89f */
+	UPROPERTY(config, EditAnywhere, Category = "Body|VarNode", DisplayName = "Background Color")
+	FLinearColor VarNodeColor = FLinearColor(0.0145f, 0.0145f, 0.0145f, 0.89f);
 
 	TMap<FString, FSlateBrush*> SlateBrushes;
 };

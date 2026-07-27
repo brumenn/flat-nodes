@@ -10,8 +10,8 @@ Works well on UE4 and UE5, since these files have not changed and the visual app
 
 ### Features
 - Graph nodes flat style
-- **[New in 5.0+]** Add few plugin settings : choose between gradient or true flat header - brightness control over flat header
-- **[New in 5.8+]** Add custom title color and node opacity in settings - brightness control over gradient header too
+- **[New in 5.0+]** Few plugin settings : choose between gradient or true flat header - brightness control over flat header
+- **[New in 5.8+]** Custom title color, header opacity, node background color and opacity in settings - brightness control over gradient header too
 
 ## Installation
 
